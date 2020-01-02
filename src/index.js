@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import axios from "axios"
+
 import TodoItem from "./todo-item"
 import "./styles.css"
 
@@ -33,13 +35,20 @@ class App extends React.Component {
     addTodo = e => {
         // stops the button from reloading the page
         e.preventDefault()
-        // fetch("http://localhost:5000/todo")
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         this.setState({
-        //             todos: data
-        //         })
-        //     })
+        axios({
+            method: "POST",
+            url: "http://localhost:5000/todo",
+            headers: {"content-type": "application/json"},
+            data: {
+                title: this.state.todo,
+                done: false
+            }
+        }).then(newData => {
+            this.setState({
+                todos: [...this.state.todos, newData.data],
+                todo: ""
+            })
+        }).catch(error => console.log("add todo error", error))
     }
 
     renderTodos = () => {

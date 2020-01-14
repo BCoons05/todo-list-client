@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import ReactDOM from 'react-dom'
 import axios from "axios"
 
@@ -6,89 +6,65 @@ import TodoItem from "./todo-item"
 import "./styles.css"
 
 
-class App extends React.Component {
-    constructor() {
-        super()
+function App  (){
+    const [todo, setTodo] = useState("")
+    const [todos, setTodos] = useState([])
 
-        this.state = {
-            todo: "",
-            todos: []
-        }
-    }
-
-    componentDidMount() {
+    useEffect(() => {
         fetch("http://localhost:5000/todos")
             .then(response => response.json())
-            .then(data => {
-                this.setState({
-                    todos: data
-                })
-            })
-    }
+            .then(data => {setTodos(data)})
+    }, [])
 
-    handleChange = e => {
-        this.setState({
-            todo: e.target.value
-        })
-    }
-
-    addTodo = e => {
+    const addTodo = e => {
         // stops the button from reloading the page
         e.preventDefault()
-        axios({
-            method: "POST",
-            url: "http://localhost:5000/todo",
-            headers: {"content-type": "application/json"},
-            data: {
-                title: this.state.todo,
-                done: false
-            }
-        }).then(newData => {
-            this.setState({
-                todos: [...this.state.todos, newData.data],
-                todo: ""
+        axios
+            .post("http://localhost:5000/todo", {
+                title: todo,
+                done:false
             })
-        }).catch(error => console.log("add todo error", error))
+        .then(newData => {
+                setTodos([newData.data, ...todos])
+                setTodo("")
+        })
+        .catch(error => console.log("add todo error", error))
     }
 
-    renderTodos = () => {
-        return this.state.todos.map(item => {
+    const renderTodos = () => {
+        return todos.map(item => {
             return (
-                <TodoItem key= {item.id} item={item} deleteTodo={this.deleteTodo} />
+                <TodoItem key={item.id} item={item} deleteTodo={deleteTodo} />
             )
         })
     }
 
-    deleteTodo = id => {
+    const deleteTodo = id => {
         fetch(`http://localhost:5000/todo/${id}`, {
             method: "DELETE"
         })
-        .then(this.setState({
-            todos: this.state.todos.filter(item => {
+        .then(
+            setTodos(todos.filter(item => {
                 return item.id !== id
-            })
-        }))
+        })))
         .catch(error => console.log("delete item error: ", error))
     }
 
-    render() {
-        // console.log(this.state.todos)
-        return (
-            <div className="app">
-                <h1>ToDo List</h1>
-                <form className="add-todo" onSubmit={this.addTodo}>
-                    <input
-                        type="text"
-                        placeholder="Add Todo"
-                        onChange={this.handleChange}
-                        value= {this.state.todo}
-                    />
-                    <button type="submit">Add Todo</button>
-                </form>
-                {this.renderTodos()}
-            </div>
-        )
-    }
+    return (
+        <div className="app">
+            <h1>ToDo List</h1>
+            <form className="add-todo" onSubmit={addTodo}>
+                <input
+                    type="text"
+                    placeholder="Add Todo"
+                    onChange={e => setTodo(e.target.value)}
+                    value= {todo}
+                />
+                <button type="submit">Add Todo</button>
+            </form>
+            {renderTodos()}
+        </div>
+    )
 }
 
 const rootElement = document.getElementById("root")

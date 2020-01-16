@@ -11,7 +11,9 @@ function App  (){
     const [todos, setTodos] = useState([])
 
     useEffect(() => {
-        fetch("http://localhost:5000/todos")
+        fetch("https://bpc-todo-flask.herokuapp.com/todos")
+        // fetch("https://bpc-todo-express.herokuapp.com/todos")
+        // fetch("http://localhost:5000/todos")
             .then(response => response.json())
             .then(data => {setTodos(data)})
     }, [])
@@ -20,7 +22,9 @@ function App  (){
         // stops the button from reloading the page
         e.preventDefault()
         axios
-            .post("http://localhost:5000/todo", {
+            .post("https://bpc-todo-flask.herokuapp.com/todo", {
+            // .post("https://bpc-todo-express.herokuapp.com/todo", {
+            // .post("http://localhost:5000/todo", {
                 title: todo,
                 done:false
             })
@@ -35,17 +39,22 @@ function App  (){
         return todos.map(item => {
             return (
                 <TodoItem key={item.id} item={item} deleteTodo={deleteTodo} />
+                // <TodoItem key={item._id} item={item} deleteTodo={deleteTodo} />
             )
         })
     }
 
     const deleteTodo = id => {
-        fetch(`http://localhost:5000/todo/${id}`, {
+        fetch(`https://bpc-todo-flask.herokuapp.com/todo/${id}`, {
+        // fetch(`https://bpc-todo-express.herokuapp.com/todo/${id}`, {
+        // fetch(`http://localhost:5000/todo/${id}`, {
             method: "DELETE"
         })
         .then(
             setTodos(todos.filter(item => {
+                // top is for flask - bottom is node/express
                 return item.id !== id
+                // return item._id !== id
         })))
         .catch(error => console.log("delete item error: ", error))
     }
